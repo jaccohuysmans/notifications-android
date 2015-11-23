@@ -11,7 +11,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
   private boolean isLocationEnabled() {
     int locationMode = 0;
     String locationProviders;
-    // this does not work for versions below KitKat
+    // Note: this does not work for versions below KitKat ( would use Settings.Secure.LOCATION_PROVIDERS_ALLOWED)
     try {
       locationMode = Settings.Secure.getInt(this.getContentResolver(), Settings.Secure.LOCATION_MODE);
     } catch (Settings.SettingNotFoundException e) {
@@ -139,20 +138,16 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
       locationManager = (LocationManager)  this.getSystemService(Context.LOCATION_SERVICE);
       criteria = new Criteria();
       bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true));
-
-      Location location = locationManager.getLastKnownLocation(bestProvider);
+      //TODO is assuming NETWORK_PROVIDER is present dangerous?  Probably.
+      Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
       if (location != null) {
-        Log.wtf("AAI",location.getLatitude()+"");
         latitude = location.getLatitude();
         longitude = location.getLongitude();
       }
       else{
         locationManager.requestLocationUpdates(bestProvider, 1000, 0, this);
-        Log.wtf("huh",bestProvider);
       }
-  }
-    else
-    {
+    } else {
       showEnableLocationMessage();
     }
   }
@@ -160,7 +155,5 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
   private void showEnableLocationMessage(){
     Toast.makeText(MainActivity.this, getString(R.string.enable_location), Toast.LENGTH_SHORT).show();
   }
-
-
 
 }
